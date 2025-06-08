@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Order {
-    private UUID id;
+    private UUID id = UUID.randomUUID();
     private List<OrderLine> orderLines;
     private Customer customer;
     private LocalDateTime orderDate;

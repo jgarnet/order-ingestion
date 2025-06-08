@@ -7,10 +7,7 @@ import org.myshop.order.Order;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 public class BatchOrdersService {
     private final int batchSize;
@@ -24,17 +21,26 @@ public class BatchOrdersService {
         ConfigurationProperties configurationProperties = container.getConfigurationProperties();
         this.batchSize = configurationProperties.getInteger("BATCH_SIZE", 5);
         final int threadPoolSize = configurationProperties.getInteger("THREAD_POOL_SIZE", 10);
-        this.executorService = Executors.newFixedThreadPool(threadPoolSize);
+        this.executorService = Executors.newFixedThreadPool(threadPoolSize, new ThreadFactory() {
+            private int count = 1;
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                t.setName("BATCH-" + count++);
+                return t;
+            }
+        });
         this.logger = container.getLogger();
 
-        this.logger.info("Initializing Order Processing with batch size: %d, thread pool: %d...%n", this.batchSize, threadPoolSize);
+        this.logger.info("Initializing Order Processing with batch size: %d, thread pool: %d...", this.batchSize, threadPoolSize);
         for (int i = 0; i < threadPoolSize; i++) {
-            this.executorService.submit(new OrderProcessor(i + 1, container));
+            this.executorService.submit(new OrderProcessor(container));
         }
     }
 
     public void ingestOrders(List<Order> orders) {
-        this.logger.info("Ingesting %d order(s)...%n", orders.size());
+        this.logger.info("Ingesting %d order(s)...", orders.size());
         List<Order> batch = new ArrayList<>();
         for (Order order : orders) {
             batch.add(order);

@@ -3,22 +3,23 @@ package org.myshop.processor;
 import org.myshop.Container;
 import org.myshop.logger.Logger;
 import org.myshop.order.Order;
+import org.myshop.persistence.repository.OrdersRepository;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 public class OrderProcessor implements Runnable {
-    private final int threadNumber;
     private final BlockingQueue<BatchOrder> queue;
     private final BlockingQueue<BatchOrder> errorQueue;
     private final Logger logger;
+    private final OrdersRepository ordersRepository;
     private static final int MAX_RETRIES = 3;
 
-    public OrderProcessor(int threadNumber, Container container) {
-        this.threadNumber = threadNumber;
+    public OrderProcessor(Container container) {
         this.queue = container.getBatchOrdersService().getQueue();
         this.errorQueue = container.getBatchOrdersService().getErrorQueue();
         this.logger = container.getLogger();
+        this.ordersRepository = container.getOrdersRepository();
     }
 
     @Override
@@ -26,7 +27,7 @@ public class OrderProcessor implements Runnable {
         try {
             while (true) {
                 BatchOrder batch = this.queue.take();
-                this.logger.info("[WORKER-%d] Accepted batch orders...%n", this.threadNumber);
+                this.logger.info("Accepted batch orders...");
                 try {
                     this.process(batch);
                 } catch (Exception e) {
@@ -34,25 +35,27 @@ public class OrderProcessor implements Runnable {
                 }
             }
         } catch (InterruptedException e) {
-            this.logger.info("[WORKER-%d] Thread interrupted%n", this.threadNumber);
+            this.logger.info("Thread interrupted");
             Thread.currentThread().interrupt();
         }
     }
 
     private void process(BatchOrder batch) throws Exception {
         List<Order> orders = batch.getOrders();
-        this.logger.info("[WORKER-%d] Processing %d orders, attempt %d...%n", this.threadNumber, orders.size(), batch.getRetryCount() + 1);
-        // todo: put processing logic
+        int size = orders.size();
+        this.logger.info("Processing %d orders, attempt %d...",  size, batch.getRetryCount() + 1);
+        this.ordersRepository.insert(orders);
+        this.logger.info("Successfully processed %d orders.", size);
     }
 
     private void handleFailure(BatchOrder batch, Exception e) {
         batch.incrementRetryCount();
-        this.logger.error("[WORKER-%d] Failed to process batch, attempt %d: %s%n", this.threadNumber, batch.getRetryCount() +  1, e.getMessage());
+        this.logger.error("Failed to process batch, attempt %d: %s", batch.getRetryCount() +  1, e.getMessage());
 
         if (batch.getRetryCount() < MAX_RETRIES) {
             this.queue.offer(batch);
         } else {
-            this.logger.error("[WORKER-%d] Batch failed after max retries, moving to error queue.%n", this.threadNumber);
+            this.logger.error("Batch failed after max retries, moving to error queue.");
             this.errorQueue.offer(batch);
         }
     }

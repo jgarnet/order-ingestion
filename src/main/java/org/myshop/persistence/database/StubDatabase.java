@@ -1,4 +1,4 @@
-package org.myshop.persistence;
+package org.myshop.persistence.database;
 
 import org.myshop.Container;
 

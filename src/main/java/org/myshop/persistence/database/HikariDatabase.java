@@ -1,4 +1,4 @@
-package org.myshop.persistence;
+package org.myshop.persistence.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
