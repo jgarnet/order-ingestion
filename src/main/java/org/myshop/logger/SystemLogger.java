@@ -13,6 +13,6 @@ public class SystemLogger implements Logger {
 
     private static String getPrefix() {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        return String.format("[%s] %s: ", stackTrace[3].getClassName(), Thread.currentThread().getName());
+        return String.format("[%s] %s: ", Thread.currentThread().getName(), stackTrace[3].getClassName());
     }
 }
