@@ -3,6 +3,7 @@ package org.myshop;
 import org.myshop.configuration.ConfigurationProperties;
 import org.myshop.http.HttpUtils;
 import org.myshop.logger.Logger;
+import org.myshop.persistence.Database;
 import org.myshop.processor.BatchOrdersService;
 
 public class Container {
@@ -10,6 +11,7 @@ public class Container {
     private HttpUtils httpUtils;
     private ConfigurationProperties configurationProperties;
     private Logger logger;
+    private Database database;
 
     public BatchOrdersService getBatchOrdersService() {
         return batchOrdersService;
@@ -41,5 +43,13 @@ public class Container {
 
     public void setLogger(Logger logger) {
         this.logger = logger;
+    }
+
+    public Database getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 }

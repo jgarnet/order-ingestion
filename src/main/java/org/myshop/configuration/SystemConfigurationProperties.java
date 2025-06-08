@@ -10,6 +10,15 @@ public class SystemConfigurationProperties implements ConfigurationProperties {
         return Integer.parseInt(value);
     }
 
+    @Override
+    public String getString(String name, String defaultValue) {
+        String value = this.getProperty(name);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
     private String getProperty(String name) {
         String value = System.getenv(name);
         if (value == null) {
