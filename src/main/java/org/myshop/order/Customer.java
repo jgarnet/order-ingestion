@@ -1,5 +1,8 @@
 package org.myshop.order;
 
+import org.apache.commons.lang3.StringUtils;
+import org.myshop.exception.ValidationException;
+
 public class Customer {
     private String firstName;
     private String lastName;
@@ -13,6 +16,15 @@ public class Customer {
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
         this.emailAddress = emailAddress;
+    }
+
+    public void validate() throws ValidationException {
+        if (StringUtils.isBlank(this.firstName)) {
+            throw new ValidationException("First name is missing.");
+        }
+        if (StringUtils.isBlank(this.lastName)) {
+            throw new ValidationException("Last name is missing.");
+        }
     }
 
     public String getFirstName() {

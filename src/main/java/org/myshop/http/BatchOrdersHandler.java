@@ -19,7 +19,7 @@ import java.util.List;
 public class BatchOrdersHandler implements HttpHandler {
     private final BatchOrdersService batchOrdersService;
     private final HttpUtils httpUtils;
-    private final ConfigurationProperties configurationProperties;
+    private final ConfigurationProperties properties;
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .create();
@@ -28,7 +28,7 @@ public class BatchOrdersHandler implements HttpHandler {
     public BatchOrdersHandler(Container container) {
         this.batchOrdersService = container.getBatchOrdersService();
         this.httpUtils = container.getHttpUtils();
-        this.configurationProperties = container.getConfigurationProperties();
+        this.properties = container.getConfigurationProperties();
     }
 
     @Override
@@ -45,12 +45,11 @@ public class BatchOrdersHandler implements HttpHandler {
             String requestBody = this.httpUtils.getRequestBody(exchange);
             List<Order> orders = this.gson.fromJson(requestBody, this.ordersListType);
 
-            Integer maxOrdersPerRequest = this.configurationProperties.getInteger("MAX_ORDERS_PER_REQUEST", 1000);
-            int size = orders.size();
-            if (size >= 1 && size <= maxOrdersPerRequest) {
+            List<String> errors = this.batchOrdersService.validate(orders);
+            if (errors.isEmpty()) {
                 this.batchOrdersService.ingestOrders(orders);
             } else {
-                response = String.format("Request must contain between 1 and %d orders.", maxOrdersPerRequest);
+                response = this.gson.toJson(errors);
                 statusCode = 400;
             }
         } catch (Exception e) {
