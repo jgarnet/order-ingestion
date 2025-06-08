@@ -19,8 +19,8 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
-      interval: 1s
-      timeout: 1s
+      interval: 2s
+      timeout: 2s
       retries: 3
     ports:
       - "3306:3306"
