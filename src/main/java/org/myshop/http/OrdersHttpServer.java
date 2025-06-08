@@ -25,7 +25,7 @@ public class OrdersHttpServer {
         this.server.createContext("/batch-orders", new BatchOrdersHandler(this.container));
 
         this.server.start();
-        System.out.println("Server started on port " + port + " with " + threadPoolSize + " threads");
+        this.container.getLogger().info("Server started on port " + port + " with " + threadPoolSize + " threads");
     }
 
     public void stop() {

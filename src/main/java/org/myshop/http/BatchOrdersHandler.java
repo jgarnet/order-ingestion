@@ -26,7 +26,7 @@ public class BatchOrdersHandler implements HttpHandler {
     private final Type ordersListType = new TypeToken<List<Order>>(){}.getType();
 
     public BatchOrdersHandler(Container container) {
-        this.batchOrdersService = container.getBatchOrderService();
+        this.batchOrdersService = container.getBatchOrdersService();
         this.httpUtils = container.getHttpUtils();
         this.configurationProperties = container.getConfigurationProperties();
     }
