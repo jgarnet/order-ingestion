@@ -43,14 +43,14 @@ public class OrderProcessor implements Runnable {
     private void process(BatchOrder batch) throws Exception {
         List<Order> orders = batch.getOrders();
         int size = orders.size();
-        this.logger.info("Processing %d orders, attempt %d...",  size, batch.getRetryCount() + 1);
+        this.logger.info("Processing %d orders, retryCount=%d...",  size, batch.getRetryCount());
         this.ordersRepository.insert(orders);
         this.logger.info("Successfully processed %d orders.", size);
     }
 
     private void handleFailure(BatchOrder batch, Exception e) {
         batch.incrementRetryCount();
-        this.logger.error("Failed to process batch, attempt %d: %s", batch.getRetryCount() +  1, e.getMessage());
+        this.logger.error("Failed to process batch, attempt %d: %s", batch.getRetryCount(), e.getMessage());
 
         if (batch.getRetryCount() < MAX_RETRIES) {
             this.queue.offer(batch);

@@ -19,6 +19,15 @@ public class SystemConfigurationProperties implements ConfigurationProperties {
         return value;
     }
 
+    @Override
+    public Boolean getBoolean(String name, Boolean defaultValue) {
+        String value = this.getProperty(name);
+        if (value == null) {
+            return defaultValue;
+        }
+        return Boolean.parseBoolean(value);
+    }
+
     private String getProperty(String name) {
         String value = System.getenv(name);
         if (value == null) {

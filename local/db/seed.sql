@@ -1,3 +1,4 @@
+-- DDL
 CREATE TABLE products (
     id VARCHAR(255) NOT NULL PRIMARY KEY,
     product_name VARCHAR(255) NOT NULL,
@@ -27,3 +28,8 @@ CREATE TABLE order_lines (
 ALTER TABLE order_lines ADD PRIMARY KEY (order_id, line_number);
 ALTER TABLE order_lines ADD FOREIGN KEY (order_id) REFERENCES orders(id);
 ALTER TABLE order_lines ADD FOREIGN KEY (product_id) REFERENCES products(id);
+
+-- DML
+-- Products
+INSERT INTO products VALUES ('iphone11', 'iPhone 11', 500.00);
+commit;
