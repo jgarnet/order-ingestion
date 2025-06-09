@@ -5,12 +5,14 @@ import org.myshop.logger.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+@Singleton
 public class OrdersHttpServer {
     private HttpServer server;
     private final Logger logger;
