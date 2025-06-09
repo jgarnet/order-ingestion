@@ -1,10 +1,10 @@
 package org.myshop.persistence.repository;
 
-import org.myshop.Container;
 import org.myshop.order.Order;
 import org.myshop.order.OrderLine;
 import org.myshop.persistence.database.Database;
 
+import javax.inject.Inject;
 import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,17 +17,17 @@ public class MySqlOrdersRepository implements OrdersRepository {
     private static final String INSERT_ORDER = "INSERT INTO orders (id, order_date) VALUES (?, ?)";
     private static final String INSERT_CUSTOMER = "INSERT INTO order_customers (order_id, first_name, last_name, email, phone) VALUES (?, ?, ?, ?, ?)";
     private static final String INSERT_LINE = "INSERT INTO order_lines (order_id, line_number, product_id, quantity) VALUES (?, ?, ?, ?)";
-    private final Container container;
 
-    public MySqlOrdersRepository(Container container) {
-        container.setOrdersRepository(this);
-        this.container = container;
+    private final Database database;
+
+    @Inject
+    public MySqlOrdersRepository(Database database) {
+        this.database = database;
     }
 
     @Override
     public void insert(List<Order> orders) throws SQLException {
-        Database db = this.container.getDatabase();
-        try (Connection conn = db.getDataSource().getConnection()) {
+        try (Connection conn = this.database.getDataSource().getConnection()) {
             conn.setAutoCommit(false);
             try {
                 for (Order order : orders) {

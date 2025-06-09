@@ -1,21 +1,22 @@
 package org.myshop.persistence.repository;
 
-import org.myshop.Container;
+import org.myshop.logger.Logger;
 import org.myshop.order.Order;
 
+import javax.inject.Inject;
 import java.sql.SQLException;
 import java.util.List;
 
 public class StubOrdersRepository implements OrdersRepository {
-    private final Container container;
+    private final Logger logger;
 
-    public StubOrdersRepository(Container container) {
-        container.setOrdersRepository(this);
-        this.container = container;
+    @Inject
+    public StubOrdersRepository(Logger logger) {
+        this.logger = logger;
     }
 
     @Override
     public void insert(List<Order> orders) throws SQLException {
-        this.container.getLogger().info("Inserting %s orders...", orders.size());
+        this.logger.info("Inserting %s orders...", orders.size());
     }
 }

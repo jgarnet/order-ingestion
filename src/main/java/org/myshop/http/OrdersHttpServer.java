@@ -1,8 +1,10 @@
 package org.myshop.http;
 
 import com.sun.net.httpserver.HttpServer;
-import org.myshop.Container;
+import org.myshop.logger.Logger;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
@@ -11,10 +13,13 @@ import java.util.concurrent.ThreadFactory;
 
 public class OrdersHttpServer {
     private HttpServer server;
-    private final Container container;
+    private final Logger logger;
+    private final Provider<BatchOrdersHandler> handlerProvider;
 
-    public OrdersHttpServer(Container container) {
-        this.container = container;
+    @Inject
+    public OrdersHttpServer(Logger logger, Provider<BatchOrdersHandler> handlerProvider) {
+        this.logger = logger;
+        this.handlerProvider = handlerProvider;
     }
 
     public void start(int port, int threadPoolSize) throws IOException {
@@ -32,10 +37,10 @@ public class OrdersHttpServer {
         });
         this.server.setExecutor(executor);
 
-        this.server.createContext("/batch-orders", new BatchOrdersHandler(this.container));
+        this.server.createContext("/batch-orders", this.handlerProvider.get());
 
         this.server.start();
-        this.container.getLogger().info("Server started on port " + port + " with " + threadPoolSize + " threads");
+        this.logger.info("Server started on port " + port + " with " + threadPoolSize + " threads");
     }
 
     public void stop() {

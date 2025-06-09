@@ -4,11 +4,11 @@ import org.myshop.order.Order;
 
 import java.util.List;
 
-public class BatchOrder {
+public class BatchOrders {
     private final List<Order> orders;
     private int retryCount;
 
-    public BatchOrder(List<Order> orders) {
+    public BatchOrders(List<Order> orders) {
         this.orders = orders;
     }
 

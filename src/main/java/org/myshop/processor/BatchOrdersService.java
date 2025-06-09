@@ -1,27 +1,30 @@
 package org.myshop.processor;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.myshop.Container;
 import org.myshop.configuration.ConfigurationProperties;
 import org.myshop.exception.ValidationException;
 import org.myshop.logger.Logger;
 import org.myshop.order.Order;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
+@Singleton
 public class BatchOrdersService {
     private final int batchSize;
     private final Integer maxOrdersPerRequest;
     private final ExecutorService executorService;
-    private final BlockingQueue<BatchOrder> queue = new LinkedBlockingQueue<>();
-    private final BlockingQueue<BatchOrder> errorQueue = new LinkedBlockingQueue<>();
     private final Logger logger;
+    private final Queues queues;
 
-    public BatchOrdersService(Container container) {
-        container.setBatchOrdersService(this);
-        ConfigurationProperties properties = container.getConfigurationProperties();
+    @Inject
+    public BatchOrdersService(ConfigurationProperties properties, Logger logger, Provider<BatchOrdersProcessor> processorProvider, Queues queues) {
         this.batchSize = properties.getInteger("BATCH_SIZE", 5);
         this.maxOrdersPerRequest = properties.getInteger("MAX_ORDERS_PER_REQUEST", 1000);
         final int threadPoolSize = properties.getInteger("THREAD_POOL_SIZE", 10);
@@ -35,11 +38,12 @@ public class BatchOrdersService {
                 return t;
             }
         });
-        this.logger = container.getLogger();
+        this.logger = logger;
+        this.queues = queues;
 
         this.logger.info("Initializing Order Processing with batch size: %d, thread pool: %d...", this.batchSize, threadPoolSize);
         for (int i = 0; i < threadPoolSize; i++) {
-            this.executorService.submit(new OrderProcessor(container));
+            this.executorService.submit(processorProvider.get());
         }
     }
 
@@ -65,22 +69,14 @@ public class BatchOrdersService {
         for (Order order : orders) {
             batch.add(order);
             if (batch.size() == this.batchSize) {
-                this.queue.offer(new BatchOrder(new ArrayList<>(batch)));
+                this.queues.getQueue().offer(new BatchOrders(new ArrayList<>(batch)));
                 batch.clear();
             }
         }
 
         if (!batch.isEmpty()) {
-            this.queue.offer(new BatchOrder(batch));
+            this.queues.getQueue().offer(new BatchOrders(batch));
         }
-    }
-
-    public BlockingQueue<BatchOrder> getQueue() {
-        return queue;
-    }
-
-    public BlockingQueue<BatchOrder> getErrorQueue() {
-        return errorQueue;
     }
 
     public void shutdown() {

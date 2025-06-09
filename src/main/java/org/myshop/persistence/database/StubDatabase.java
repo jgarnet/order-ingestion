@@ -1,7 +1,5 @@
 package org.myshop.persistence.database;
 
-import org.myshop.Container;
-
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -11,8 +9,6 @@ import java.util.logging.Logger;
 
 public class StubDatabase implements Database {
     private final StubDataSource dataSource = new StubDataSource();
-
-    public StubDatabase(Container container) {}
 
     @Override
     public DataSource getDataSource() {

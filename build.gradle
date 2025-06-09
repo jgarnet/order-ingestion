@@ -11,11 +11,18 @@ repositories {
 }
 
 dependencies {
+    // DI
+    implementation 'com.google.dagger:dagger:2.51'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.51'
+    // JSON
     implementation 'com.google.code.gson:gson:2.10.1'
+    // DB
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'com.zaxxer:HikariCP:5.1.0'
+    // Utils
     implementation 'org.apache.commons:commons-lang3:3.17.0'
     implementation 'org.apache.commons:commons-collections4:4.5.0'
+    // Test
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }

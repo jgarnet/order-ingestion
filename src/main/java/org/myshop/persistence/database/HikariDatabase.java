@@ -2,18 +2,16 @@ package org.myshop.persistence.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.myshop.Container;
 import org.myshop.configuration.ConfigurationProperties;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 public class HikariDatabase implements Database {
     private final HikariDataSource dataSource;
 
-    public HikariDatabase(Container container) {
-        container.setDatabase(this);
-        ConfigurationProperties properties = container.getConfigurationProperties();
-
+    @Inject
+    public HikariDatabase(ConfigurationProperties properties) {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(properties.getString("DB_URL", null));
         config.setUsername(properties.getString("DB_USER", null));

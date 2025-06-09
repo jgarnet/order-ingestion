@@ -6,16 +6,13 @@ WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY gradle ./gradle
 COPY gradlew ./
-COPY /gradle/wrapper/gradle-wrapper.properties ./gradle/wrapper
-
-# clean old build
-RUN ./gradlew clean
+COPY /gradle ./gradle
 
 # copy project src
 COPY src ./src
 
 # build new jar
-RUN ./gradlew shadowJar
+RUN ./gradlew clean shadowJar
 
 # lightweight runtime image
 FROM eclipse-temurin:21-jre

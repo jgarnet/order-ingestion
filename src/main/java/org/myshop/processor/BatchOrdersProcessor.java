@@ -1,32 +1,33 @@
 package org.myshop.processor;
 
-import org.myshop.Container;
 import org.myshop.logger.Logger;
 import org.myshop.order.Order;
 import org.myshop.persistence.repository.OrdersRepository;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
-public class OrderProcessor implements Runnable {
-    private final BlockingQueue<BatchOrder> queue;
-    private final BlockingQueue<BatchOrder> errorQueue;
+public class BatchOrdersProcessor implements Runnable {
+    private final BlockingQueue<BatchOrders> queue;
+    private final BlockingQueue<BatchOrders> errorQueue;
     private final Logger logger;
     private final OrdersRepository ordersRepository;
     private static final int MAX_RETRIES = 3;
 
-    public OrderProcessor(Container container) {
-        this.queue = container.getBatchOrdersService().getQueue();
-        this.errorQueue = container.getBatchOrdersService().getErrorQueue();
-        this.logger = container.getLogger();
-        this.ordersRepository = container.getOrdersRepository();
+    @Inject
+    public BatchOrdersProcessor(Queues queues, Logger logger, OrdersRepository ordersRepository) {
+        this.queue = queues.getQueue();
+        this.errorQueue = queues.getErrorQueue();
+        this.logger = logger;
+        this.ordersRepository = ordersRepository;
     }
 
     @Override
     public void run() {
         try {
             while (true) {
-                BatchOrder batch = this.queue.take();
+                BatchOrders batch = this.queue.take();
                 this.logger.info("Accepted batch orders...");
                 try {
                     this.process(batch);
@@ -40,7 +41,7 @@ public class OrderProcessor implements Runnable {
         }
     }
 
-    private void process(BatchOrder batch) throws Exception {
+    private void process(BatchOrders batch) throws Exception {
         List<Order> orders = batch.getOrders();
         int size = orders.size();
         this.logger.info("Processing %d orders, retryCount=%d...",  size, batch.getRetryCount());
@@ -48,7 +49,7 @@ public class OrderProcessor implements Runnable {
         this.logger.info("Successfully processed %d orders.", size);
     }
 
-    private void handleFailure(BatchOrder batch, Exception e) {
+    private void handleFailure(BatchOrders batch, Exception e) {
         batch.incrementRetryCount();
         this.logger.error("Failed to process batch, attempt %d: %s", batch.getRetryCount(), e.getMessage());
 
