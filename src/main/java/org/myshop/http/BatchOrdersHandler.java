@@ -6,7 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.myshop.order.Order;
-import org.myshop.processor.BatchOrdersService;
+import org.myshop.batch.BatchOrdersService;
 
 import javax.inject.Inject;
 import java.io.IOException;

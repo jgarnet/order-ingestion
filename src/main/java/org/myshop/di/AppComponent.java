@@ -7,7 +7,7 @@ import org.myshop.http.OrdersHttpServer;
 import org.myshop.logger.Logger;
 import org.myshop.persistence.database.Database;
 import org.myshop.persistence.repository.OrdersRepository;
-import org.myshop.processor.Queues;
+import org.myshop.batch.Queues;
 
 import javax.inject.Singleton;
 

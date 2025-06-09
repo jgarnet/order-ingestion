@@ -1,4 +1,4 @@
-package org.myshop.processor;
+package org.myshop.batch;
 
 import org.myshop.logger.Logger;
 import org.myshop.order.Order;

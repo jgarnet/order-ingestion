@@ -1,4 +1,4 @@
-package org.myshop.processor;
+package org.myshop.batch;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.myshop.configuration.ConfigurationProperties;

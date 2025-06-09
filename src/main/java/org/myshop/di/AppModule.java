@@ -12,7 +12,7 @@ import org.myshop.persistence.database.StubDatabase;
 import org.myshop.persistence.repository.MySqlOrdersRepository;
 import org.myshop.persistence.repository.OrdersRepository;
 import org.myshop.persistence.repository.StubOrdersRepository;
-import org.myshop.processor.Queues;
+import org.myshop.batch.Queues;
 
 import javax.inject.Singleton;
 
