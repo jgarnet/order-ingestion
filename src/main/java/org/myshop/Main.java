@@ -12,14 +12,13 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        // initialize container
+        // initialize DI container
         ConfigurationProperties properties = new SystemConfigurationProperties();
         AppComponent appComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(properties))
                 .build();
         Logger logger = appComponent.logger();
         logger.info("Starting order ingestion API...");
-        logger.info("Building container dependencies...");
         // start http server
         logger.info("Initializing HTTP server...");
         OrdersHttpServer httpServer = appComponent.ordersHttpServer();
