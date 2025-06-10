@@ -2,6 +2,10 @@ package org.myshop.di;
 
 import dagger.Module;
 import dagger.Provides;
+import org.myshop.Constants;
+import org.myshop.batch.BatchOrders;
+import org.myshop.batch.BlockingQueueProvider;
+import org.myshop.batch.QueueProvider;
 import org.myshop.configuration.ConfigurationProperties;
 import org.myshop.http.HttpUtils;
 import org.myshop.logger.Logger;
@@ -12,8 +16,8 @@ import org.myshop.persistence.database.StubDatabase;
 import org.myshop.persistence.repository.MySqlOrdersRepository;
 import org.myshop.persistence.repository.OrdersRepository;
 import org.myshop.persistence.repository.StubOrdersRepository;
-import org.myshop.batch.Queues;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Module
@@ -64,7 +68,15 @@ public class AppModule {
 
     @Provides
     @Singleton
-    Queues provideQueues() {
-        return new Queues();
+    @Named(Constants.BATCH_ORDERS_QUEUE)
+    QueueProvider<BatchOrders> provideBatchOrdersQueue() {
+        return new BlockingQueueProvider<>();
+    }
+
+    @Provides
+    @Singleton
+    @Named(Constants.ERROR_QUEUE)
+    QueueProvider<BatchOrders> provideErrorQueue() {
+        return new BlockingQueueProvider<>();
     }
 }

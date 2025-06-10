@@ -1,43 +1,43 @@
 package org.myshop.batch;
 
+import org.myshop.Constants;
 import org.myshop.logger.Logger;
 import org.myshop.order.Order;
 import org.myshop.persistence.repository.OrdersRepository;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 
 public class BatchOrdersProcessor implements Runnable {
-    private final BlockingQueue<BatchOrders> queue;
-    private final BlockingQueue<BatchOrders> errorQueue;
+    private final QueueProvider<BatchOrders> queue;
+    private final QueueProvider<BatchOrders> errorQueue;
     private final Logger logger;
     private final OrdersRepository ordersRepository;
     private static final int MAX_RETRIES = 3;
 
     @Inject
-    public BatchOrdersProcessor(Queues queues, Logger logger, OrdersRepository ordersRepository) {
-        this.queue = queues.getQueue();
-        this.errorQueue = queues.getErrorQueue();
+    public BatchOrdersProcessor(@Named(Constants.BATCH_ORDERS_QUEUE) QueueProvider<BatchOrders> queue,
+                                @Named(Constants.ERROR_QUEUE) QueueProvider<BatchOrders> errorQueue,
+                                Logger logger,
+                                OrdersRepository ordersRepository
+    ) {
+        this.queue = queue;
+        this.errorQueue = errorQueue;
         this.logger = logger;
         this.ordersRepository = ordersRepository;
     }
 
     @Override
     public void run() {
-        try {
-            while (true) {
-                BatchOrders batch = this.queue.take();
-                this.logger.info("Accepted batch orders...");
-                try {
-                    this.process(batch);
-                } catch (Exception e) {
-                    this.handleFailure(batch, e);
-                }
+        while (true) {
+            BatchOrders batch = this.queue.poll();
+            this.logger.info("Accepted batch orders...");
+            try {
+                this.process(batch);
+            } catch (Exception e) {
+                this.handleFailure(batch, e);
             }
-        } catch (InterruptedException e) {
-            this.logger.info("Thread interrupted");
-            Thread.currentThread().interrupt();
         }
     }
 
@@ -54,10 +54,10 @@ public class BatchOrdersProcessor implements Runnable {
         this.logger.error("Failed to process batch, attempt %d: %s", batch.getRetryCount(), e.getMessage());
 
         if (batch.getRetryCount() < MAX_RETRIES) {
-            this.queue.offer(batch);
+            this.queue.put(batch);
         } else {
             this.logger.error("Batch failed after max retries, moving to error queue.");
-            this.errorQueue.offer(batch);
+            this.errorQueue.put(batch);
         }
     }
 }

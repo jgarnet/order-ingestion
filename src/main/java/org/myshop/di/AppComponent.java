@@ -7,12 +7,11 @@ import org.myshop.http.OrdersHttpServer;
 import org.myshop.logger.Logger;
 import org.myshop.persistence.database.Database;
 import org.myshop.persistence.repository.OrdersRepository;
-import org.myshop.batch.Queues;
 
 import javax.inject.Singleton;
 
-@Component(modules = AppModule.class)
 @Singleton
+@Component(modules = AppModule.class)
 public interface AppComponent {
     HttpUtils httpUtils();
     ConfigurationProperties properties();
@@ -20,5 +19,4 @@ public interface AppComponent {
     Database database();
     OrdersRepository ordersRepository();
     OrdersHttpServer ordersHttpServer();
-    Queues queues();
 }

@@ -1,12 +1,14 @@
 package org.myshop.batch;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.myshop.Constants;
 import org.myshop.configuration.ConfigurationProperties;
 import org.myshop.exception.ValidationException;
 import org.myshop.logger.Logger;
 import org.myshop.order.Order;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.ArrayList;
@@ -21,10 +23,14 @@ public class BatchOrdersService {
     private final Integer maxOrdersPerRequest;
     private final ExecutorService executorService;
     private final Logger logger;
-    private final Queues queues;
+    private final QueueProvider<BatchOrders> queue;
 
     @Inject
-    public BatchOrdersService(ConfigurationProperties properties, Logger logger, Provider<BatchOrdersProcessor> processorProvider, Queues queues) {
+    public BatchOrdersService(ConfigurationProperties properties,
+                              Logger logger,
+                              Provider<BatchOrdersProcessor> processorProvider,
+                              @Named(Constants.BATCH_ORDERS_QUEUE) QueueProvider<BatchOrders> queue
+    ) {
         this.batchSize = properties.getInteger("BATCH_SIZE", 5);
         this.maxOrdersPerRequest = properties.getInteger("MAX_ORDERS_PER_REQUEST", 1000);
         final int threadPoolSize = properties.getInteger("THREAD_POOL_SIZE", 10);
@@ -39,7 +45,7 @@ public class BatchOrdersService {
             }
         });
         this.logger = logger;
-        this.queues = queues;
+        this.queue = queue;
 
         this.logger.info("Initializing Order Processing with batch size: %d, thread pool: %d...", this.batchSize, threadPoolSize);
         for (int i = 0; i < threadPoolSize; i++) {
@@ -69,13 +75,13 @@ public class BatchOrdersService {
         for (Order order : orders) {
             batch.add(order);
             if (batch.size() == this.batchSize) {
-                this.queues.getQueue().offer(new BatchOrders(new ArrayList<>(batch)));
+                this.queue.put(new BatchOrders(new ArrayList<>(batch)));
                 batch.clear();
             }
         }
 
         if (!batch.isEmpty()) {
-            this.queues.getQueue().offer(new BatchOrders(batch));
+            this.queue.put(new BatchOrders(batch));
         }
     }
 
