@@ -17,11 +17,13 @@ public class OrdersHttpServer {
     private HttpServer server;
     private final Logger logger;
     private final Provider<BatchOrdersHandler> handlerProvider;
+    private final Provider<ErrorStoreHandler> eqHandlerProvider;
 
     @Inject
-    public OrdersHttpServer(Logger logger, Provider<BatchOrdersHandler> handlerProvider) {
+    public OrdersHttpServer(Logger logger, Provider<BatchOrdersHandler> handlerProvider, Provider<ErrorStoreHandler> eqHandlerProvider) {
         this.logger = logger;
         this.handlerProvider = handlerProvider;
+        this.eqHandlerProvider = eqHandlerProvider;
     }
 
     public void start(int port, int threadPoolSize) throws IOException {
@@ -40,6 +42,7 @@ public class OrdersHttpServer {
         this.server.setExecutor(executor);
 
         this.server.createContext("/batch-orders", this.handlerProvider.get());
+        this.server.createContext("/eq", this.eqHandlerProvider.get());
 
         this.server.start();
         this.logger.info("Server started on port " + port + " with " + threadPoolSize + " threads");

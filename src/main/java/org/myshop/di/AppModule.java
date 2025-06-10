@@ -4,8 +4,6 @@ import dagger.Module;
 import dagger.Provides;
 import org.myshop.Constants;
 import org.myshop.batch.BatchOrders;
-import org.myshop.batch.BlockingQueueProvider;
-import org.myshop.batch.QueueProvider;
 import org.myshop.configuration.ConfigurationProperties;
 import org.myshop.http.HttpUtils;
 import org.myshop.logger.Logger;
@@ -16,9 +14,14 @@ import org.myshop.persistence.database.StubDatabase;
 import org.myshop.persistence.repository.MySqlOrdersRepository;
 import org.myshop.persistence.repository.OrdersRepository;
 import org.myshop.persistence.repository.StubOrdersRepository;
+import org.myshop.queue.BlockingQueueProvider;
+import org.myshop.queue.ErrorStore;
+import org.myshop.queue.HashMapErrorStore;
+import org.myshop.queue.QueueProvider;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.util.UUID;
 
 @Module
 public class AppModule {
@@ -75,8 +78,8 @@ public class AppModule {
 
     @Provides
     @Singleton
-    @Named(Constants.ERROR_QUEUE)
-    QueueProvider<BatchOrders> provideErrorQueue() {
-        return new BlockingQueueProvider<>();
+    @Named(Constants.ERROR_STORE)
+    ErrorStore<BatchOrders, UUID> provideErrorStore() {
+        return new HashMapErrorStore<>();
     }
 }

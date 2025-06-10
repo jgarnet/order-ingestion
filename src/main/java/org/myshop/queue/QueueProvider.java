@@ -1,4 +1,4 @@
-package org.myshop.batch;
+package org.myshop.queue;
 
 public interface QueueProvider<T> {
     T poll();

@@ -4,26 +4,29 @@ import org.myshop.Constants;
 import org.myshop.logger.Logger;
 import org.myshop.order.Order;
 import org.myshop.persistence.repository.OrdersRepository;
+import org.myshop.queue.ErrorStore;
+import org.myshop.queue.QueueProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
+import java.util.UUID;
 
 public class BatchOrdersProcessor implements Runnable {
     private final QueueProvider<BatchOrders> queue;
-    private final QueueProvider<BatchOrders> errorQueue;
+    private final ErrorStore<BatchOrders, UUID> errorStore;
     private final Logger logger;
     private final OrdersRepository ordersRepository;
     private static final int MAX_RETRIES = 3;
 
     @Inject
     public BatchOrdersProcessor(@Named(Constants.BATCH_ORDERS_QUEUE) QueueProvider<BatchOrders> queue,
-                                @Named(Constants.ERROR_QUEUE) QueueProvider<BatchOrders> errorQueue,
+                                @Named(Constants.ERROR_STORE) ErrorStore<BatchOrders, UUID> errorStore,
                                 Logger logger,
                                 OrdersRepository ordersRepository
     ) {
         this.queue = queue;
-        this.errorQueue = errorQueue;
+        this.errorStore = errorStore;
         this.logger = logger;
         this.ordersRepository = ordersRepository;
     }
@@ -54,10 +57,11 @@ public class BatchOrdersProcessor implements Runnable {
         this.logger.error("Failed to process batch, attempt %d: %s", batch.getRetryCount(), e.getMessage());
 
         if (batch.getRetryCount() < MAX_RETRIES) {
+            batch.getErrors().add(e.getMessage());
             this.queue.put(batch);
         } else {
-            this.logger.error("Batch failed after max retries, moving to error queue.");
-            this.errorQueue.put(batch);
+            this.logger.error("Batch (id=%s) failed after max retries, moving to error queue.", batch.getId());
+            this.errorStore.put(batch.getId(), batch);
         }
     }
 }

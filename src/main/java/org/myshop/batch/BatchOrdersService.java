@@ -6,6 +6,7 @@ import org.myshop.configuration.ConfigurationProperties;
 import org.myshop.exception.ValidationException;
 import org.myshop.logger.Logger;
 import org.myshop.order.Order;
+import org.myshop.queue.QueueProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;

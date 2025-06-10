@@ -1,4 +1,4 @@
-package org.myshop.batch;
+package org.myshop.queue;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
