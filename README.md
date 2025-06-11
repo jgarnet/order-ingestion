@@ -18,7 +18,7 @@ The project is using Dagger 2 for dependency injection, leveraging a global [App
 
 ## HTTP Layer
 
-The http layer uses a simple Java [HTTP Server implementation](./src/main/java/org/myshop/http/OrdersHttpServer.java) as a front controller for handling HTTP requests. Request handlers are split across multiple threads using the ExecutorService.
+The HTTP layer uses a simple Java [HTTP Server implementation](./src/main/java/org/myshop/http/OrdersHttpServer.java) as a front controller for handling HTTP requests. Request handlers are split across multiple threads using the ExecutorService.
 
 Operations include [batch order ingestion](./src/main/java/org/myshop/http/BatchOrdersHandler.java) and [error store operations](./src/main/java/org/myshop/http/ErrorStoreHandler.java).
 
